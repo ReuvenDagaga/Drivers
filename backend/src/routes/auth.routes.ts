@@ -1,11 +1,11 @@
-import { Router } from 'express';
-import { registerHandler, loginHandler, verifyOTPHandler, logoutHandler } from '../controllers/auth.controller';
+import { Router } from "express";
+import { register, login, verifyLoginOTP, logoutUser } from "../controllers/auth.controller";
 
 const router = Router();
 
-router.post('/register', registerHandler);
-router.post('/login', loginHandler);
-router.post('/verify-otp', verifyOTPHandler);
-router.post('/logout', logoutHandler);
+router.post("/register", register);
+router.post("/login", login);
+router.post("/verify-otp", verifyLoginOTP);
+router.post("/logout", logoutUser);
 
 export default router;

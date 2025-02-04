@@ -1,65 +1,55 @@
-import admin from '../config/firebase';
-import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';
-import Driver from '../models/Driver';
+import jwt from "jsonwebtoken";
+import DriverModel from "../models/Driver";
+import { sendOTP } from "./OTP/infobipService";
 
-dotenv.config();
+export const registerDriver = async (nickname: string, carYear: number, carCompany: string, carModel: string, color: string, carImage: string, address: string, email: string, phoneNumber: string) => {
+    let existingDriver = await DriverModel.findOne({ phoneNumber });
+    if (existingDriver) throw new Error("Driver already exists");
 
-const JWT_SECRET = process.env.JWT_SECRET || 'RANDOMREUVEN';
-
-export const sendOTP = async (phoneNumber: string) => {
-    try {
-      const user = await admin.auth().getUserByPhoneNumber(phoneNumber);
-      if (!user) {
-        throw new Error('User not found');
-      }
-  
-      const customToken = await admin.auth().createCustomToken(user.uid);
-
-      return { message: 'OTP sent successfully', customToken };
-    } catch (error: any) {
-      throw new Error(error.message || 'Failed to send OTP');
-    }
-  };
-  
-
-export const verifyOTP = async (phoneNumber: string, verificationCode: string) => {
-  const user = await admin.auth().getUserByPhoneNumber(phoneNumber).catch(() => null);
-
-  if (!user) {
-    throw new Error('User not found');
-  }
-
-  const token = jwt.sign({ uid: user.uid, phoneNumber }, JWT_SECRET, { expiresIn: '1h' });
-  return token;
-};
-
-export const registerDriver = async (data: any) => {
-    const { phone } = data;
-  
-    const existingDriver = await Driver.findOne({ phone });
-    if (existingDriver) throw new Error('Driver already exists');
-  
-    const userRecord = await admin.auth().createUser({ phoneNumber: phone }).catch(() => null);
-    
-    if (!userRecord) {
-      throw new Error('Failed to create user in Firebase');
-    }
-  
-    const driver = new Driver({ ...data, uid: userRecord.uid });
+    const driver = new DriverModel({ nickname, carYear, carCompany, carModel, color, carImage, address, email, phoneNumber });
     await driver.save();
-  
-    return { message: 'User registered successfully. OTP sent.' };
-  };
-
-
-export const loginDriver = async (phoneNumber: string) => {
-  const existingDriver = await Driver.findOne({ phone: phoneNumber });
-  if (!existingDriver) throw new Error('Driver not found');
-
-  return sendOTP(phoneNumber);
+    return driver;
 };
 
-export const logoutDriver = async (phoneNumber: string) => {
-  return { message: 'Logged out successfully' };
+export const generateAndSendOTP = async (phoneNumber: string) => {
+    const driver = await DriverModel.findOne({ phoneNumber });
+    if (!driver) throw new Error("Driver not found");
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    console.log(`📡 Generated OTP: ${otp}`);
+
+    await sendOTP(phoneNumber, otp);
+
+    driver.otp = otp;
+    driver.otpExpires = new Date(Date.now() + 10 * 60 * 1000);
+    await driver.save();
+};
+
+export const verifyOTP = async (phoneNumber: string, otp: string) => {
+    const driver = await DriverModel.findOne({ phoneNumber });
+    if (!driver) throw new Error("Driver not found");
+
+    if (!driver.otp || driver.otp !== otp || (driver.otpExpires && driver.otpExpires < new Date())) {
+        throw new Error("Invalid or expired OTP");
+    }
+
+    // יצירת JWT Token
+    const token = jwt.sign({ id: driver._id, phoneNumber: driver.phoneNumber }, process.env.JWT_SECRET!, { expiresIn: "7d" });
+
+    // ניקוי ה-OTP מהמסד לאחר השימוש
+    driver.otp = undefined;
+    driver.otpExpires = undefined;
+    await driver.save();
+
+    return token;
+};
+
+export const logout = async (phoneNumber: string) => {
+    const driver = await DriverModel.findOne({ phoneNumber });
+    if (!driver) throw new Error("Driver not found");
+
+    // ניקוי ה-OTP לאחר התנתקות
+    driver.otp = undefined;
+    driver.otpExpires = undefined;
+    await driver.save();
 };

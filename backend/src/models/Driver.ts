@@ -6,10 +6,12 @@ export interface IDriver extends Document {
   carCompany: string;
   carModel: string;
   color: string;
-  carImage: string;
+  carImage?: string;
   address: string;
   email: string;
-  phone: string;
+  phoneNumber: string;
+  otp?: string;
+  otpExpires?: Date;
 }
 
 const DriverSchema: Schema = new Schema({
@@ -21,7 +23,9 @@ const DriverSchema: Schema = new Schema({
   carImage: { type: String, required: false },
   address: { type: String, required: true },
   email: { type: String, required: true },
-  phone: { type: String, required: true }
+  phoneNumber: { type: String, required: true, unique: true },
+  otp: { type: String, required: false },
+  otpExpires: { type: Date, required: false }
 });
 
 export default mongoose.model<IDriver>('Driver', DriverSchema);

@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "A ride-sharing backend server built with TypeScript and Express",
   "main": "dist/server.js",
+  "type": "module",
   "scripts": {
     "dev": "nodemon --exec ts-node src/server.ts",
     "start": "ts-node src/server.ts"
