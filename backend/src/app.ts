@@ -5,7 +5,6 @@ import morgan from 'morgan';
 import driverRoutes from './routes/driver.routes';
 import passengerRoutes from './routes/passenger.routes';
 import rideRoutes from './routes/ride.routes';
-import authRoutes from './routes/auth.routes';
 
 const app: Application = express();
 
@@ -15,7 +14,6 @@ app.use(morgan('dev'));
 app.use(express.json()); 
 
 
-app.use('/api/auth', authRoutes);
 app.use('/api/drivers', driverRoutes);
 app.use('/api/passengers', passengerRoutes);
 app.use('/api/rides', rideRoutes);

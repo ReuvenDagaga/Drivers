@@ -10,8 +10,7 @@ export interface IDriver extends Document {
   address: string;
   email: string;
   phoneNumber: string;
-  otp?: string;
-  otpExpires?: Date;
+  password: string;
 }
 
 const DriverSchema: Schema = new Schema({
@@ -24,8 +23,7 @@ const DriverSchema: Schema = new Schema({
   address: { type: String, required: true },
   email: { type: String, required: true },
   phoneNumber: { type: String, required: true, unique: true },
-  otp: { type: String, required: false },
-  otpExpires: { type: Date, required: false }
+  password: { type: String, required: true },
 });
 
 export default mongoose.model<IDriver>('Driver', DriverSchema);

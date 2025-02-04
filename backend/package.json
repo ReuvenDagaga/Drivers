@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "A ride-sharing backend server built with TypeScript and Express",
   "main": "dist/server.js",
-  "type": "module",
   "scripts": {
     "dev": "nodemon --exec ts-node src/server.ts",
     "start": "ts-node src/server.ts"
@@ -12,6 +11,7 @@
   "author": "Reuven",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.0.0",
@@ -24,6 +24,7 @@
     "twilio": "^5.4.3"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
     "@types/bcryptjs": "^2.4.6",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.17",
