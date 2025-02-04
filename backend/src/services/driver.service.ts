@@ -41,7 +41,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your_secret_key'; // עדיף לא
 export const loginDriverHandlerService = async (
   phoneNumber: string,
   password: string
-): Promise<{ token: string } | null> => {
+): Promise<{ token: string, driver: IDriver } | null> => {
   const driver = await Driver.findOne({ phoneNumber });
   if (!driver) {
     throw new Error('User not found');
@@ -54,7 +54,7 @@ export const loginDriverHandlerService = async (
   const token = jwt.sign({ id: driver._id, phoneNumber: driver.phoneNumber }, JWT_SECRET, {
     expiresIn: '7d',
   });
-  
-  return { token };
+
+  return { token, driver };
 };
 
